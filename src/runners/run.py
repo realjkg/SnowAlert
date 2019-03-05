@@ -8,7 +8,7 @@ from runners import alert_suppressions_runner
 from runners import alert_handler
 from runners import violation_queries_runner
 from runners import violation_suppressions_runner
-from runners import pipeline_runner
+from runners import ingest_runner
 
 
 def main(command, rule_name=None):
@@ -37,7 +37,7 @@ def main(command, rule_name=None):
             violation_suppressions_runner.main()
 
         if command in ['ingest']:
-            pipeline_runner.main()
+            ingest_runner.main()
 
 
 if __name__ == '__main__':
