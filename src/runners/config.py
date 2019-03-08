@@ -12,6 +12,7 @@ RESULTS_ALERTS_TABLE_NAME = os.environ.get('SA_RESULTS_ALERTS_TABLE_NAME', "aler
 RESULTS_VIOLATIONS_TABLE_NAME = os.environ.get('SA_RESULTS_VIOLATIONS_TABLE_NAME', "violations")
 QUERY_METADATA_TABLE_NAME = os.environ.get('SA_QUERY_METADATA_TABLE_NAME', "query_metadata")
 RUN_METADATA_TABLE_NAME = os.environ.get('SA_RUN_METADATA_TABLE_NAME', "run_metadata")
+BASELINE_METADATA_TABLE = os.environ.get('SA_BASELINE_METADATA_TABLE_NAME', "metadata_baseline_table_creation")
 
 # schemas
 DATA_SCHEMA = os.environ.get('SA_DATA_SCHEMA', f"{DATABASE}.{DATA_SCHEMA_NAME}")
