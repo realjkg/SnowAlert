@@ -60,8 +60,3 @@ def main():
             print(e)
 
     alooma_pysdk.terminate()
-
-
-if __name__ == "__main__":
-    print("invoked!")
-    main()
