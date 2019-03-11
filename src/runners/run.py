@@ -10,6 +10,7 @@ from runners import violation_queries_runner
 from runners import violation_suppressions_runner
 from runners import alert_processor
 from runners import ingest_runner
+from runners import baseline_runner
 
 
 def main(command, rule_name=None):
@@ -43,9 +44,12 @@ def main(command, rule_name=None):
         if command in ['ingest']:
             ingest_runner.main()
 
+        if command in ['baseline']:
+            baseline_runner.main()
+
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1 and sys.argv[1] in ['alerts', 'violations', 'all']:
+    if len(sys.argv) > 1 and sys.argv[1] in ['alerts', 'violations', 'all', 'baseline']:
         main(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
     else:
         print('usage: run.py [alerts|violations|all]', file=sys.stderr, flush=True)
