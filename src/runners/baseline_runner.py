@@ -51,8 +51,8 @@ def unpack(data):
     return output
 
 
-def query_log_source(ctx, source):
-    query = f"""SELECT * from {source};"""
+def query_log_source(ctx, source, time_filter, history):
+    query = f"""SELECT * from {source} where {history} > dateadd(day, -{time_filter}, current_timestamp());"""
     if ctx is not None:
         try:
             data = db.fetch(ctx, query)
@@ -86,12 +86,14 @@ def run_baseline(ctx, row):
     required_values = metadata['required values']
     output_table = row['name']
     code_location = metadata['module name']
+    time_filter = metadata['filter']
+    history = metadata['history']
 
     with open(f"../baseline_modules/{code_location}/{code_location}.r", "r") as f:
         r_code = f.read()
 
     r_code = format_code(r_code, required_values)
-    frame = query_log_source(ctx, log_source)
+    frame = query_log_source(ctx, log_source, time_filter, history)
     ro.globalenv['input_table'] = frame
 
     output = ro.r(r_code).to_dict()
