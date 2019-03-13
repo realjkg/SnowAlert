@@ -1,5 +1,4 @@
 from runners.config import (
-    BASELINE_METADATA_TABLE,
     DATA_SCHEMA_NAME,
 )
 
@@ -8,23 +7,21 @@ from runners.helpers import db, log
 from rpy2 import robjects as ro
 from rpy2.robjects import pandas2ri
 
-import json
 import pandas
+import yaml
 
 #  This function is going to be modified; instead of reading a metadata table, we're going to query tables that adhere to a naming standard and parse
 #  comments on those tables to get metadata.
 
-def read_metadata_table():
-    query = f"""
-        SELECT * from SNOWALERT.{DATA_SCHEMA_NAME}.{BASELINE_METADATA_TABLE};
-        """
 
+def read_metadata(ctx):
+    query = f"""show tables like '%BASELINE' in snowalert.{DATA_SCHEMA_NAME}"""
     try:
-        ctx, rows = db.connect_and_fetchall(query)
-        return ctx, rows
+        rows = db.fetch(ctx, query)
+        return list(rows)
     except Exception as e:
-        log.error("Unable to read metadata table: ", e)
-        return None, None
+        log.error("Unable to read metadata: ", e)
+        return None
 
 
 def format_code(r, vars):
@@ -73,20 +70,9 @@ def query_log_source(ctx, source):
     return r_dataframe
 
 
-def check_output_table_query(table, results):
-    columns = []
-    for k in results:
-        columns.append(k)
-
-    column_names = " VARCHAR, ".join(columns)
-    query = f"CREATE TABLE IF NOT EXISTS {table} ( " + column_names + " VARCHAR )"
-
-    return query
-
-
 def log_results_query(target, results):
 
-    query = f"""insert into {target} values """
+    query = f"""insert into snowalert.{DATA_SCHEMA_NAME}.{target} values """
     for i in results:
         query += str(i) + ", "
 
@@ -95,10 +81,11 @@ def log_results_query(target, results):
 
 
 def run_baseline(ctx, row):
-    log_source = row[0]
-    required_values = json.loads(row[1])
-    output_table = row[2]
-    code_location = row[3]
+    metadata = yaml.load(row['comment'])
+    log_source = metadata['log source']
+    required_values = metadata['required values']
+    output_table = row['name']
+    code_location = metadata['module name']
 
     with open(f"../baseline_modules/{code_location}/{code_location}.r", "r") as f:
         r_code = f.read()
@@ -108,10 +95,6 @@ def run_baseline(ctx, row):
     ro.globalenv['input_table'] = frame
 
     output = ro.r(r_code).to_dict()
-    try:
-        db.execute(ctx, check_output_table_query(output_table, output))
-    except Exception as e:
-        log.error("Failed to create the output table", e)
 
     results = unpack(output)
     try:
@@ -121,6 +104,9 @@ def run_baseline(ctx, row):
 
 
 def main():
-    ctx, rows = read_metadata_table()
-    for row in rows:
+    ctx = db.connect()
+    log.info("Finding baseline metadata")
+    tables = read_metadata(ctx)
+
+    for row in tables:
         run_baseline(ctx, row)
