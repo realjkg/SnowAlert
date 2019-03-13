@@ -84,6 +84,7 @@ def connect(run_preflight_checks=True, flush_cache=False, oauth={}):
 
 def fetch(ctx, query):
     res = execute(ctx, query)
+    print(res.description)
     cols = [c[0] for c in res.description]
     while True:
         row = res.fetchone()
