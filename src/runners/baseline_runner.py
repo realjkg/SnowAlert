@@ -81,7 +81,12 @@ def log_results_query(target, results):
 
 
 def run_baseline(ctx, row):
-    metadata = yaml.load(row['comment'])
+    try:
+        metadata = yaml.load(row['comment'])
+    except Exception:
+        log.error(f"No comment for table {row['name']}")
+        return None
+
     log_source = metadata['log source']
     required_values = metadata['required values']
     output_table = row['name']
@@ -96,7 +101,9 @@ def run_baseline(ctx, row):
     frame = query_log_source(ctx, log_source, time_filter, history)
     ro.globalenv['input_table'] = frame
 
-    output = ro.r(r_code).to_dict()
+    output = ro.r(r_code)
+    print(type(output))
+    output = output.to_dict()
 
     results = unpack(output)
     try:
