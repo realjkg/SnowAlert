@@ -87,6 +87,7 @@ def run_baseline(ctx, row):
         log.error(f"No comment for table {row['name']}")
         return None
 
+    metadata = yaml.load(row['comment'])
     log_source = metadata['log source']
     required_values = metadata['required values']
     output_table = row['name']
@@ -104,6 +105,7 @@ def run_baseline(ctx, row):
     output = ro.r(r_code)
     print(type(output))
     output = output.to_dict()
+    output = ro.r(r_code).to_dict()
 
     results = unpack(output)
     try:
