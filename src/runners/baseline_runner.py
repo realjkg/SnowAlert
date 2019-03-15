@@ -10,9 +10,6 @@ from rpy2.robjects import pandas2ri
 import pandas
 import yaml
 
-#  This function is going to be modified; instead of reading a metadata table, we're going to query tables that adhere to a naming standard and parse
-#  comments on those tables to get metadata.
-
 
 def read_metadata(ctx):
     query = f"""show tables like '%BASELINE' in snowalert.{DATA_SCHEMA_NAME}"""
