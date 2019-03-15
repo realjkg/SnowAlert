@@ -12,7 +12,7 @@ import yaml
 
 
 def read_metadata(ctx):
-    query = f"""show tables like '%BASELINE' in snowalert.{DATA_SCHEMA_NAME}"""
+    query = f"""show tables like '%_BASELINE' in snowalert.{DATA_SCHEMA_NAME}"""
     try:
         rows = db.fetch(ctx, query)
         return list(rows)
